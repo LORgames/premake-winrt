@@ -6,9 +6,9 @@ This module extends the Visual Studio actions (`premake5 vs2013`)
 
 Dictating the target device: (required)
 
-`system "windowsphone81"`
+`system "windowsphone8.1"`
 
-Allowed values are "windowstore8.0", "windowsstore8.1", "windowsphone8.0", "windowsphone8.1" and "windowsuniversal", supported systems is listed below in Notes.
+Allowed values are "windowsstore8.0", "windowsstore8.1", "windowsphone8.0", "windowsphone8.1" and "windowsuniversal", supported systems is listed below in Notes.
 
 ARM has been added to the list of supported platforms: (required if you're aiming for ARM devices)
 
@@ -29,6 +29,9 @@ If you need to deploy files (such as all the images listed in your Package.appxm
 filter { "files:Assets/*.png" }
 	deploy "true"
 ```
+
+If you need to disable the generation of the Windows Metadata file:
+`generatewinmd "false"`
 
 I believe you need to dictate a "default language", this can be done using: (required?)
 

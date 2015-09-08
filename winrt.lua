@@ -113,6 +113,14 @@
 		return elements
 	end)
 
+	p.override(p.vstudio.vc2010.elements, "link", function(base, cfg, explicit)
+		local elements = base(cfg, explicit)
+		elements = table.join(elements, {
+			m.generateWINMD,
+		})
+		return elements
+	end)
+
 	-- Due to the vstudio section in premake not being 100% module friendly, this override is messed up
 	p.override(p.vstudio.sln2005, "sections", function(base, wks)
 		p.vstudio.sln2005.sectionmap.ConfigurationPlatforms = function(wks)
@@ -291,6 +299,12 @@
 	function m.deploymentContent(fcfg, condition)
 		if fcfg and fcfg.deploy then
 			p.vstudio.vc2010.element("DeploymentContent", nil, fcfg.deploy)
+		end
+	end
+
+	function m.generateWINMD(cfg, explicit)
+		if cfg.generatewinmd then
+			p.vstudio.vc2010.element("GenerateWindowsMetadata", nil, cfg.generatewinmd)
 		end
 	end
 

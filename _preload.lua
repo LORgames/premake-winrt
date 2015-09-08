@@ -72,6 +72,16 @@
 		},
 	}
 
+	api.register {
+		name = "generatewinmd",
+		scope = "config",
+		kind = "string",
+		allowed = {
+			"true",
+			"false",
+		}
+	}
+
 --
 -- Set global environment for the default WinRT platforms
 --
