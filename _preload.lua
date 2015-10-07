@@ -82,6 +82,18 @@
 		}
 	}
 
+	api.register {
+		name = "certificatefile",
+		scope = "project",
+		kind = "string",
+	}
+
+	api.register {
+		name = "certificatethumbprint",
+		scope = "project",
+		kind = "string",
+	}
+
 --
 -- Set global environment for the default WinRT platforms
 --
