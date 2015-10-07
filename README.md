@@ -33,6 +33,12 @@ filter { "files:Assets/*.png" }
 If you need to disable the generation of the Windows Metadata file:
 `generatewinmd "false"`
 
+If you need to provide a certificate and [thumbprint](https://msdn.microsoft.com/en-us/library/ms734695(v=vs.110).aspx) for building a package:
+```
+certificatefile "certificate.pfx"
+certificatethumbprint "0000000000000000000000000000000000000000"
+```
+
 I believe you need to dictate a "default language", this can be done using: (required?)
 
 `defaultlanguage "en-AU"`

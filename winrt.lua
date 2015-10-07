@@ -239,6 +239,24 @@
 		return elements
 	end)
 
+	p.override(p.vstudio.vc2010, "userMacros", function(base, cfg)
+		if cfg.certificatefile ~= nil or cfg.certificatethumbprint ~= nil then
+			p.vstudio.vc2010.propertyGroup(nil, "UserMacros")
+
+			if cfg.certificatefile ~= nil then
+				p.vstudio.vc2010.element("PackageCertificateKeyFile", nil, cfg.certificatefile)
+			end
+
+			if cfg.certificatethumbprint ~= nil then
+				p.vstudio.vc2010.element("PackageCertificateThumbprint", nil, cfg.certificatethumbprint)
+			end
+
+			p.pop('</PropertyGroup>')
+		else
+			base(cfg)
+		end
+	end)
+
 	function m.applicationType(prj)
 		local type
 		local revision
