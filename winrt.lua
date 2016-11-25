@@ -48,12 +48,20 @@
 		return elements
 	end)
 
-	p.override(p.vstudio.vc2010.elements, "ClCompileFileCfg", function(base, fcfg, condition)
-		local elements = base(fcfg, condition)
-		elements = table.join(elements, {
-			m.compileAsWinRT,
-		})
-		return elements
+	p.override(p.vstudio.vc2010, "emitFiles", function(base, prj, group, tag, fileFunc, fileCfgFunc, checkFunc)
+		if isWinRT(prj.system) then
+			if tag == "ClCompile" then
+				fileCfgFunc = table.join(fileCfgFunc or {}, {
+					m.compileAsWinRT,
+				})
+			elseif tag == "None" then
+				fileCfgFunc = table.join(fileCfgFunc or {}, {
+					m.deploymentContent,
+				})
+			end
+		end
+
+		base(prj, group, tag, fileFunc, fileCfgFunc, checkFunc)
 	end)
 
 	p.override(p.vstudio.vc2010, "characterSet", function(base, cfg)
@@ -97,21 +105,19 @@
 		end
 	end)
 
-	p.override(p.vstudio.vc2010, "categorizeFile", function(base, prj, file)
-		if m.isAppxmanifest(file.name) then
-			return "AppxManifest"
+	p.vstudio.vc2010.categories.AppxManifest = {
+		name = "AppxManifest",
+		extensions = { ".appxmanifest" },
+		priority = 99,
+
+		emitFiles = function(prj, group)
+			p.vstudio.vc2010.emitFiles(prj, group, "AppxManifest", { p.vstudio.vc2010.generatedFile })
+		end,
+
+		emitFilter = function(prj, group)
+			p.vstudio.vc2010.filterGroup(prj, group, "AppxManifest")
 		end
-
-		return base(prj, file)
-	end)
-
-	p.override(p.vstudio.vc2010.elements, "files", function(base, prj, groups)
-		local elements = base(prj, groups)
-		elements = table.join(elements, {
-			m.appxmanifestFiles,
-		})
-		return elements
-	end)
+	}
 
 	p.override(p.vstudio.vc2010.elements, "link", function(base, cfg, explicit)
 		local elements = base(cfg, explicit)
@@ -134,18 +140,10 @@
 
 
 	function m.deployProject(cfg, context)
-		if isWinRT(cfg.system) and cfg.kind == p.WINDOWEDAPP then
+		if isWinRT(context.prj.system) and context.prj.kind == p.WINDOWEDAPP then
 			p.w('{%s}.%s.Deploy.0 = %s|%s', context.prj.uuid, context.descriptor, context.platform, context.architecture)
 		end
 	end
-
-	p.override(p.vstudio.vc2010.elements, "NoneFileCfg", function(base, fcfg, condition)
-		local elements = base(fcfg, condition)
-		elements = table.join(elements, {
-			m.deploymentContent,
-		})
-		return elements
-	end)
 
 	p.override(p.vstudio.vc2010, "userMacros", function(base, cfg)
 		if cfg.certificatefile ~= nil or cfg.certificatethumbprint ~= nil then
@@ -200,31 +198,15 @@
 		end
 	end
 
-	function m.windowsAppContainer(cfg)
-		if isWinRT(cfg.system) then
-			p.vstudio.vc2010.element("WindowsAppContainer", nil, "true")
-		end
-	end
-
-	function m.isAppxmanifest(fname)
-		return path.hasextension(fname, { ".appxmanifest" })
-	end
-
-	function m.appxmanifestFiles(prj, groups)
-		p.vstudio.vc2010.emitFiles(prj, groups, "AppxManifest")
-	end
-
-	function p.vstudio.vc2010.elements.AppxManifestFile(cfg, file)
-		return {}
-	end
-
-	function p.vstudio.vc2010.elements.AppxManifestFileCfg(fcfg, condition)
-		return {}
-	end
-
 	function m.deploymentContent(fcfg, condition)
 		if fcfg and fcfg.deploy then
 			p.vstudio.vc2010.element("DeploymentContent", nil, fcfg.deploy)
+		end
+	end
+
+	function m.windowsAppContainer(cfg)
+		if isWinRT(cfg.system) then
+			p.vstudio.vc2010.element("WindowsAppContainer", nil, "true")
 		end
 	end
 

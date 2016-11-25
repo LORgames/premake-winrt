@@ -116,6 +116,9 @@
 	filter { "system:windowsphone8.1" }
 		toolset "v120_wp81"
 
+	filter { "system:windowsstore8.1" }
+		toolset "v120"
+
 	filter {}
 
 --
