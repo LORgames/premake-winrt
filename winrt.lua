@@ -50,14 +50,27 @@
 
 	p.override(p.vstudio.vc2010, "emitFiles", function(base, prj, group, tag, fileFunc, fileCfgFunc, checkFunc)
 		if isWinRT(prj.system) then
-			if tag == "ClCompile" then
-				fileCfgFunc = table.join(fileCfgFunc or {}, {
-					m.compileAsWinRT,
-				})
-			elseif tag == "None" then
-				fileCfgFunc = table.join(fileCfgFunc or {}, {
-					m.deploymentContent,
-				})
+			local oldFn = fileCfgFunc
+			fileCfgFunc = function (...)
+				local elements
+
+				if type(oldFn) == "function" then
+					elements = oldFn(...)
+				else
+					elements = oldFn
+				end
+
+				if tag == "ClCompile" then
+					elements = table.join(elements or {}, {
+						m.compileAsWinRT,
+					})
+				elseif tag == "None" then
+					elements = table.join(elements or {}, {
+						m.deploymentContent,
+					})
+				end
+
+				return elements
 			end
 		end
 
@@ -105,13 +118,17 @@
 		end
 	end)
 
+	function m.subtype(fcfg, condition)
+		p.vstudio.vc2010.element("SubType", nil, "Designer")
+	end
+
 	p.vstudio.vc2010.categories.AppxManifest = {
 		name = "AppxManifest",
 		extensions = { ".appxmanifest" },
 		priority = 99,
 
 		emitFiles = function(prj, group)
-			p.vstudio.vc2010.emitFiles(prj, group, "AppxManifest", { p.vstudio.vc2010.generatedFile })
+			p.vstudio.vc2010.emitFiles(prj, group, "AppxManifest", { p.vstudio.vc2010.generatedFile, m.subtype })
 		end,
 
 		emitFilter = function(prj, group)
